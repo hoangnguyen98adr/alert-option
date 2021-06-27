@@ -11,14 +11,14 @@ import kotlinx.android.synthetic.main.item_option_todo.view.*
 class DialogOptionItemAdapter :
     RecyclerView.Adapter<DialogOptionItemAdapter.DialogOptionItemViewHolder>() {
     private var mListDialogOption = ArrayList<AlertModel>()
-    private var mCallback: ((String, String) -> Unit)? = null
+    private var mCallback: ((Int, String) -> Unit)? = null
 
     fun setList(list: ArrayList<AlertModel>) {
         mListDialogOption = list
         notifyDataSetChanged()
     }
 
-    fun setCallback(callback: (String, String) -> Unit) {
+    fun setCallback(callback: (Int, String) -> Unit) {
         mCallback = callback
     }
 
@@ -36,12 +36,9 @@ class DialogOptionItemAdapter :
     override fun onBindViewHolder(holder: DialogOptionItemViewHolder, position: Int) {
         val itemData = mListDialogOption[position]
         holder.itemView.apply {
-            tvLastDone.text = itemData.alertDisplay
+            tvLastDone.text = itemData.alertField
             setOnClickListener {
-                mCallback?.invoke(
-                    itemData.alertDisplay ?: "",
-                    itemData.alertField ?: ""
-                )
+                mCallback?.invoke(itemData.alertKey ?: 0, itemData.alertField ?: "")
             }
         }
     }

@@ -2,45 +2,60 @@ package com.example.navproject.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.navproject.constants.TodoEnum
+import com.example.navproject.constants.AlertType
 import com.example.navproject.models.AlertModel
+import com.example.navproject.screens.HomeFragment.Companion.PRICE_DONE_UP
 
 class TodoViewModel : ViewModel() {
-    var mListOptionTodoLiveData: MutableLiveData<ArrayList<AlertModel>> = MutableLiveData()
-    var mListAlertFieldLiveData: MutableLiveData<ArrayList<TodoEnum.AlertType>> = MutableLiveData()
     var mListDataMockAPI: MutableLiveData<ArrayList<AlertModel>> = MutableLiveData()
-    var mIsPriceUp: Boolean = false
-    var mIsPriceDown: Boolean = false
+    val mListOptionAlertLiveData: MutableLiveData<ArrayList<AlertModel>> = MutableLiveData()
+    private val alertMap = hashMapOf(
+        "last_done_up" to 0,
+        "bid_price_up" to 0,
+        "ask_price_up" to 0,
+        "last_done_down" to 1,
+        "bid_price_down" to 1,
+        "ask_price_down" to 1
+    )
 
     init {
-        initData()
+        initOptionAlert()
         mockDataAPI()
     }
 
     private fun mockDataAPI() {
         val dataMock = ArrayList<AlertModel>()
-        dataMock.add(AlertModel("LastDoneUp", "LastPrice", alertID = "14", alertValue = 250))
-        dataMock.add(AlertModel("LastDoneDown", "LastPrice", alertID = "15", alertValue = 15))
-        dataMock.add(AlertModel("BidPriceUp", "BidPrice", alertID = "16", alertValue = 24))
+        dataMock.add(AlertModel("bid_price_down", "ask price", alertID = "22", alertValue = "50"))
+        dataMock.add(AlertModel("pc_change_up", "Chane %", alertID = "16", alertValue = "24"))
+        dataMock.add(AlertModel("vol_up", "Chane %", alertID = "5", alertValue = "7"))
         mListDataMockAPI.value = dataMock
     }
 
-    private fun initData() {
-        var listOptions = ArrayList<AlertModel>()
-        for (item in TodoEnum.AlertType.values()) {
-            listOptions.add(item.type)
-        }
-        listOptions = listOptions.distinctBy { it.alertField } as ArrayList<AlertModel>
-        mListOptionTodoLiveData.value = listOptions
+    private fun initOptionAlert() {
+        val listOption = ArrayList<AlertModel>()
+        listOption.add(AlertModel(alertKey = 0, alertField = "last done"))
+        listOption.add(AlertModel(alertKey = 1, alertField = "bid price"))
+        listOption.add(AlertModel(alertKey = 2, alertField = "ask price"))
+        mListOptionAlertLiveData.value = listOption
     }
 
-    fun getAlertType(type: String) {
-        mListDataMockAPI.value?.filter { it.alertField == type }?.forEach {
-            for (item in TodoEnum.AlertType.values()) {
-                item.type.alertID = it.alertID
-                item.type.alertValue = it.alertValue
-            }
+    fun getAlertType(alertKey: Int?, optionKey: Int? = 0): AlertType? {
+        return AlertType.values().let { list ->
+            if (alertKey == PRICE_DONE_UP) list.firstOrNull { it.type.alertKey == optionKey }
+            else list.lastOrNull { it.type.alertKey == optionKey }
         }
-        mListAlertFieldLiveData.value = TodoEnum.AlertType.values().filter { it.type.alertField == type } as ArrayList<TodoEnum.AlertType>
+    }
+
+    fun getDataFromAlert(alertKey: Int? = null, type: String? = null): AlertModel? {
+        return mListDataMockAPI.value?.let { list ->
+            if (type.isNullOrEmpty()) list.find { alertMap[it.alertType] == alertKey }
+            else { list.find { it.alertType == type } }
+        }
+    }
+
+    fun getCurrentKeyAlert(): Int? {
+        return AlertType.values().find { list ->
+            list.type.alertType == mListDataMockAPI.value?.find { alertMap.containsKey(it.alertType) }?.alertType
+        }?.type?.alertKey ?: 0
     }
 }

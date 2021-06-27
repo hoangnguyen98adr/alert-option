@@ -9,7 +9,7 @@ import com.example.navproject.adapters.DialogOptionItemAdapter
 import com.example.navproject.models.AlertModel
 import kotlinx.android.synthetic.main.dialog_option_todo.*
 
-class TodoDialogFragment(var list: ArrayList<AlertModel>, private val callback: (String, String) -> Unit) : DialogFragment() {
+class TodoDialogFragment(var list: ArrayList<AlertModel>, private val callback: (Int, String) -> Unit) : DialogFragment() {
     private val mDialogOptionItemAdapter = DialogOptionItemAdapter()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -22,8 +22,8 @@ class TodoDialogFragment(var list: ArrayList<AlertModel>, private val callback: 
     }
 
     private fun initListener(dialog: Dialog) {
-        mDialogOptionItemAdapter.setCallback { alertDisplay, alertField ->
-            callback.invoke(alertDisplay, alertField)
+        mDialogOptionItemAdapter.setCallback { alertKey, alertField ->
+            callback.invoke(alertKey, alertField)
             dialog.dismiss()
         }
     }
